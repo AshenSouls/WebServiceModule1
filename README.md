@@ -1,98 +1,50 @@
-# University Course Management API
+# University Course Management System
 
-Учебный REST Web API на ASP.NET Core для управления университетскими курсами, студентами, преподавателями и записями на курсы.
+Учебное решение на платформах **.NET 9**, состоящее из двух независимых приложений: REST Web API (**`UniversityApi`**) и клиентского MVC-приложения (**`UniversityClient`**). 
 
-## Требования
+Проект разработан для управления университетскими курсами, студентами, преподавателями и записями на курсы с поддержкой авторизации, разграничения прав доступа на основе ролей и проверки владения ресурсом.
 
-- .NET SDK 9.0 или выше
-- Microsoft SQL Server
-- Инструмент Entity Framework Core CLI
+---
 
-При необходимости установите инструмент Entity Framework Core CLI:
+##  Архитектура решения
 
-```bash
-dotnet tool install --global dotnet-ef
-```
+Решение объединяет два компонента:
 
-## Локальный запуск
+1. **`UniversityApi`** — Backend-сервис на ASP.NET Core Web API:
+   - Аутентификация и авторизация на основе **ASP.NET Core Identity** и **JWT Bearer Token**.
+   - Ролевая модель: `Admin`, `Teacher`, `Student`.
+   - Проверка прав доступа и владения ресурсом на уровне контроллеров.
+   - Версионирование API (`v1` и `v2`) с разделением DTO.
+   - Поддержка CORS, интеграция Swagger UI с поддержкой авторизации по токену.
+   - Автоматическая обработка ошибок через `ExceptionMiddleware` с единым форматом ответа `ReturnResult<T>`.
+   - Хранение секретных ключей подписи JWT вне исходного кода с помощью **User Secrets**.
 
-### 1. Клонирование репозитория
+2. **`UniversityClient`** — Frontend-клиент на ASP.NET Core MVC:
+   - Взаимодействует с Web API через HTTP с использованием `IHttpClientFactory` и типизированного клиента `CoursesApiClient`.
+   - Не имеет прямого подключения к базе данных.
+   - Отображает каталог курсов, детализацию и обрабатывает ошибки недоступности API.
 
-```bash
-git clone https://github.com/AshenSouls/WebServiceModule1
-cd addway_module_1\UniversityApi
-```
+---
 
-### 2. Настройка подключения к базе данных
+##  Технологический стек
 
-Откройте файл `UniversityApi/appsettings.json` и укажите параметры подключения к Microsoft SQL Server:
+- **Платформа:** .NET 9.0 (ASP.NET Core Web API / ASP.NET Core MVC)
+- **База данных:** Microsoft SQL Server (LocalDB / Express), Entity Framework Core 9 (Code First)
+- **Безопасность:** ASP.NET Core Identity, JWT Bearer Token, User Secrets, CORS
+- **Паттерны и архитектура:** Repository Pattern, Dependency Injection, DTO
+- **Библиотеки и инструменты:**
+  - AutoMapper — маппинг сущностей и DTO
+  - FluentValidation — валидация входных данных
+  - Asp.Versioning — версионирование API
+  - Swashbuckle (Swagger/OpenAPI) — документация API
+  - `ILogger` — логирование операций
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost,1433;Database=UniversityDb;Trusted_Connection=True;TrustServerCertificate=True;"
-  }
-}
-```
+---
 
-При необходимости замените значение `Server` на адрес и порт вашего SQL Server.
+##  Требования к окружению
 
-### 3. Применение миграций
-
-Выполните команду из каталога `UniversityApi`:
-
-```bash
-dotnet ef database update
-```
-
-Команда создаст базу данных `UniversityDb` и необходимые таблицы на указанном SQL Server.
-
-### 4. Запуск приложения
-
-```bash
-dotnet run
-```
-
-### 5. Открытие Swagger UI
-
-После запуска откройте в браузере:
-
-```text
-http://localhost:5180/swagger
-```
-
-Также приложение поддерживает HTTPS по адресу `https://localhost:7249/swagger`.
-
-## Структура проекта
-
-- `Controllers/` — REST-контроллеры для работы со студентами, преподавателями, курсами и записями на курсы.
-- `Models/` — доменные сущности Entity Framework Core: `Student`, `Teacher`, `Course` и `Enrollment`.
-- `DTO/` — объекты передачи данных и валидаторы FluentValidation, сгруппированные по сущностям.
-- `Data/` — контекст базы данных `ApplicationDbContext`, конфигурация связей и индексов.
-- `Repositories/` — реализация паттерна Repository:
-  - `Interfaces/` — интерфейсы репозиториев.
-  - `Implementations/` — реализации репозиториев на основе Entity Framework Core.
-- `Mapping/` — профиль AutoMapper для преобразования между сущностями и DTO.
-- `Middleware/` — глобальная обработка исключений в `ExceptionMiddleware`.
-- `Common/` — общая обертка ответов API `ReturnResult<T>`.
-- `Migrations/` — миграции Entity Framework Core.
-
-## Используемые технологии
-
-- .NET 9.0
-- ASP.NET Core Web API
-- Microsoft SQL Server
-- Entity Framework Core
-- Repository Pattern
-- Dependency Injection
-- AutoMapper
-- FluentValidation
-- Swashbuckle (Swagger / OpenAPI)
-- `ILogger`
-
-## Основные API-ресурсы
-
-- `Students` — управление студентами
-- `Teachers` — управление преподавателями
-- `Courses` — управление курсами
-- `Enrollments` — управление записями студентов на курсы
+- **.NET SDK 9.0** или выше
+- **Microsoft SQL Server** (LocalDB или обычный сервер)
+- Глобальный инструмент **Entity Framework Core CLI**:
+  ```bash
+  dotnet tool install --global dotnet-ef
